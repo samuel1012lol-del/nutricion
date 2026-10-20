@@ -1,0 +1,19 @@
+# NutriBalance
+
+Aplicación web en español para registrar comidas y seguir el balance energético diario con una meta orientada a la recomposición corporal.
+
+## Uso
+
+Abre `index.html` en un navegador. Completa **Mi perfil** para calcular una meta inicial, y luego usa **Añadir comida** para registrar calorías y macronutrientes. Puedes cambiar de fecha, editar o eliminar registros y anotar vasos de agua.
+
+Los datos se guardan en el almacenamiento local del navegador. No se envían a un servidor.
+
+## Objetivos
+
+La estimación usa la ecuación de Mifflin–St Jeor para el metabolismo basal, un factor de actividad para aproximar el gasto total, proteína de 2 g/kg, grasas de 0,8 g/kg y carbohidratos para completar las calorías. Recomposición propone inicialmente un ajuste moderado de -200 kcal frente al gasto estimado. Puedes fijar una meta calórica manual en tu perfil.
+
+Estas cifras son orientativas y no sustituyen una evaluación profesional. La fórmula ofrece una estimación poblacional y puede no ser adecuada para menores de 18 años, embarazo, lactancia o condiciones médicas; en esos casos consulta con un profesional de salud.
+
+## Publicación
+
+El sitio es estático y no requiere dependencias. Para publicarlo con GitHub Pages, abre **Settings → Pages**, selecciona la rama `main` y la carpeta raíz, y guarda.
