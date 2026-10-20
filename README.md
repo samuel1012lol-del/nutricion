@@ -17,3 +17,8 @@ Estas cifras son orientativas y no sustituyen una evaluación profesional. La f�
 ## Publicación
 
 El sitio es estático y no requiere dependencias. Para publicarlo con GitHub Pages, abre **Settings → Pages**, selecciona la rama `main` y la carpeta raíz, y guarda.
+
+
+## Uso en teléfono
+
+El sitio puede instalarse como aplicación en la pantalla de inicio y guarda en caché la interfaz para abrirla sin conexión después de la primera visita. En navegadores compatibles, usa **Instalar** dentro de la app o la opción **Añadir a pantalla de inicio** del menú del navegador. La disponibilidad de instalación depende del navegador y del dispositivo.
