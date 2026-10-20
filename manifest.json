@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "NutriBalance — Nutrición diaria",
+  "short_name": "NutriBalance",
+  "description": "Registra tus comidas y sigue tus objetivos diarios de nutrición.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f7f3",
+  "theme_color": "#a82e3a",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
