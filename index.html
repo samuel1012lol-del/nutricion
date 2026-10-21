@@ -121,10 +121,13 @@
 </form></div>
 <div class="overlay" id="mealModal"><form class="modal" id="mealForm">
   <div class="modal-head"><div><div class="eyebrow">Registro de alimentos</div><h2 id="mealModalTitle">Añadir comida</h2></div><button type="button" class="close-x" data-close aria-label="Cerrar">×</button></div>
-  <p class="intro">Ingresa los valores de la porción que comiste. Puedes consultarlos en la etiqueta nutricional.</p>
+  <p class="intro">Escribe un alimento conocido y la cantidad. NutriBalance estimará automáticamente sus calorías y macronutrientes. Los valores se basan en referencias promedio por 100 g o 100 ml.</p>
   <div class="form-grid">
-    <div class="field full"><label for="mealName">Nombre de la comida o alimento</label><input id="mealName" required maxlength="80" placeholder="Ej. Avena con yogur y plátano"></div>
+    <div class="field full"><label for="mealName">Alimento</label><input id="mealName" list="foodOptions" required maxlength="80" placeholder="Ej. arroz cocido, huevo, leche"><datalist id="foodOptions"></datalist></div>
+    <div class="field"><label for="mealAmount">Cantidad</label><input id="mealAmount" type="number" min="0.1" max="10000" step="any" value="100" required placeholder="100"></div>
+    <div class="field"><label for="mealUnit">Unidad</label><select id="mealUnit"><option value="g">Gramos (g)</option><option value="ml">Mililitros (ml)</option><option value="l">Litros (L)</option></select></div>
     <div class="field"><label for="mealType">Momento</label><select id="mealType"><option>Desayuno</option><option>Almuerzo</option><option>Merienda</option><option>Cena</option><option>Snack</option></select></div>
+    <div class="field full" id="nutritionStatus" role="status" style="padding:10px 12px;border-radius:10px;background:#f8e8e9;color:#7f2630;font-size:12px">Elige un alimento de la lista para calcular automáticamente.</div>
     <div class="field"><label for="mealKcal">Calorías (kcal)</label><input id="mealKcal" type="number" min="0" max="10000" required placeholder="450"></div>
     <div class="field"><label for="mealProtein">Proteína (g)</label><input id="mealProtein" type="number" min="0" max="1000" step=".1" required placeholder="30"></div>
     <div class="field"><label for="mealCarbs">Carbohidratos (g)</label><input id="mealCarbs" type="number" min="0" max="1000" step=".1" required placeholder="50"></div>
@@ -206,14 +209,56 @@
   function closeModals(){$$('.overlay').forEach(x=>x.classList.remove('show'))}
   function $$(sel){return document.querySelectorAll(sel)}
   function openProfile(){const p=state.profile||{};$('pName').value=p.name||'';$('pAge').value=p.age||'';$('pSex').value=p.sex||'female';$('pHeight').value=p.height||'';$('pWeight').value=p.weight||'';$('pActivity').value=p.activity||'1.2';$('pGoal').value=p.goal||'recomp';$('pCalories').value=p.calories||'';openModal('profileModal')}
-  function openMeal(id=null){editingId=id;const m=id?dayData().meals.find(x=>x.id===id):null;$('mealForm').reset();$('mealModalTitle').textContent=m?'Editar comida':'Añadir comida';if(m){$('mealName').value=m.name;$('mealType').value=m.type;$('mealKcal').value=m.kcal;$('mealProtein').value=m.protein;$('mealCarbs').value=m.carbs;$('mealFat').value=m.fat}openModal('mealModal')}
+  const foods=[
+    {name:'Arroz cocido',aliases:['arroz'],unit:'g',kcal:130,protein:2.7,carbs:28.2,fat:0.3},
+    {name:'Avena seca',aliases:['avena'],unit:'g',kcal:389,protein:16.9,carbs:66.3,fat:6.9},
+    {name:'Pan blanco',aliases:['pan'],unit:'g',kcal:266,protein:8.9,carbs:49,fat:3.2},
+    {name:'Pan integral',aliases:[],unit:'g',kcal:247,protein:13,carbs:41,fat:4.2},
+    {name:'Pasta cocida',aliases:['fideos cocidos','pasta'],unit:'g',kcal:158,protein:5.8,carbs:30.9,fat:0.9},
+    {name:'Papa cocida',aliases:['papa','patata'],unit:'g',kcal:87,protein:1.9,carbs:20.1,fat:0.1},
+    {name:'Camote cocido',aliases:['camote'],unit:'g',kcal:90,protein:2,carbs:20.7,fat:0.2},
+    {name:'Pollo cocido',aliases:['pollo','pechuga de pollo'],unit:'g',kcal:165,protein:31,carbs:0,fat:3.6},
+    {name:'Carne de vacuno cocida',aliases:['carne','vacuno','carne molida'],unit:'g',kcal:250,protein:26,carbs:0,fat:15},
+    {name:'Atún al agua drenado',aliases:['atun','atún'],unit:'g',kcal:116,protein:25.5,carbs:0,fat:0.8},
+    {name:'Salmón cocido',aliases:['salmon'],unit:'g',kcal:206,protein:22,carbs:0,fat:12.4},
+    {name:'Huevo entero',aliases:['huevo','huevos'],unit:'g',kcal:143,protein:12.6,carbs:0.7,fat:9.5},
+    {name:'Lentejas cocidas',aliases:['lentejas'],unit:'g',kcal:116,protein:9,carbs:20.1,fat:0.4},
+    {name:'Porotos cocidos',aliases:['porotos','frijoles'],unit:'g',kcal:127,protein:8.7,carbs:22.8,fat:0.5},
+    {name:'Garbanzos cocidos',aliases:['garbanzos'],unit:'g',kcal:164,protein:8.9,carbs:27.4,fat:2.6},
+    {name:'Leche entera',aliases:['leche'],unit:'ml',kcal:61,protein:3.2,carbs:4.8,fat:3.3},
+    {name:'Leche descremada',aliases:[],unit:'ml',kcal:34,protein:3.4,carbs:5,fat:0.1},
+    {name:'Yogur natural',aliases:['yogur','yogurt'],unit:'g',kcal:61,protein:3.5,carbs:4.7,fat:3.3},
+    {name:'Yogur griego natural',aliases:['yogur griego','yogurt griego'],unit:'g',kcal:97,protein:9,carbs:3.9,fat:5},
+    {name:'Queso fresco',aliases:['queso'],unit:'g',kcal:299,protein:18.1,carbs:2,fat:23.8},
+    {name:'Plátano',aliases:['platano','banana'],unit:'g',kcal:89,protein:1.1,carbs:22.8,fat:0.3},
+    {name:'Manzana',aliases:['manzana'],unit:'g',kcal:52,protein:0.3,carbs:13.8,fat:0.2},
+    {name:'Palta',aliases:['aguacate'],unit:'g',kcal:160,protein:2,carbs:8.5,fat:14.7},
+    {name:'Tomate',aliases:['tomate'],unit:'g',kcal:18,protein:0.9,carbs:3.9,fat:0.2},
+    {name:'Lechuga',aliases:['lechuga'],unit:'g',kcal:15,protein:1.4,carbs:2.9,fat:0.2},
+    {name:'Brócoli cocido',aliases:['brocoli','brócoli'],unit:'g',kcal:35,protein:2.4,carbs:7.2,fat:0.4},
+    {name:'Zanahoria',aliases:['zanahoria'],unit:'g',kcal:41,protein:0.9,carbs:9.6,fat:0.2},
+    {name:'Almendras',aliases:['almendra'],unit:'g',kcal:579,protein:21.2,carbs:21.6,fat:49.9},
+    {name:'Maní',aliases:['mani','cacahuate'],unit:'g',kcal:567,protein:25.8,carbs:16.1,fat:49.2},
+    {name:'Aceite de oliva',aliases:['aceite'],unit:'ml',kcal:884,protein:0,carbs:0,fat:100},
+    {name:'Azúcar',aliases:['azucar'],unit:'g',kcal:387,protein:0,carbs:100,fat:0},
+    {name:'Jugo de naranja',aliases:['jugo naranja'],unit:'ml',kcal:45,protein:0.7,carbs:10.4,fat:0.2},
+    {name:'Agua',aliases:[],unit:'ml',kcal:0,protein:0,carbs:0,fat:0}
+  ];
+  const normalizeFood=v=>String(v||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().trim();
+  function findFood(value){const q=normalizeFood(value);return foods.find(f=>normalizeFood(f.name)===q||f.aliases.some(a=>normalizeFood(a)===q))||null}
+  function populateFoodOptions(){$('foodOptions').innerHTML=foods.map(f=>'<option value="'+f.name.replace(/"/g,'&quot;')+'"></option>').join('')}
+  function calculateFood(){const food=findFood($('mealName').value),amount=Number($('mealAmount').value),unit=$('mealUnit').value;if(!food){$('nutritionStatus').textContent='No encuentro ese alimento en la lista. Puedes introducir los valores manualmente o elegir un alimento sugerido.';return}if(!(amount>0)){return}const factor=(unit==='l'?1000:1)*(amount/100);$('mealKcal').value=(food.kcal*factor).toFixed(1).replace(/\\.0$/,'');$('mealProtein').value=(food.protein*factor).toFixed(1).replace(/\\.0$/,'');$('mealCarbs').value=(food.carbs*factor).toFixed(1).replace(/\\.0$/,'');$('mealFat').value=(food.fat*factor).toFixed(1).replace(/\\.0$/,'');const base=unit==='l'?'ml':unit;$('nutritionStatus').textContent='Estimación para '+amount+' '+unit+' de '+food.name+'. Referencia: valores promedio por 100 '+(food.unit==='ml'?'ml':'g')+'. '+(food.unit!==base?'La conversión por volumen/peso es aproximada.':'Puedes ajustar los valores si la etiqueta del producto indica otros.')}
+  function openMeal(id=null){editingId=id;const m=id?dayData().meals.find(x=>x.id===id):null;$('mealForm').reset();$('mealModalTitle').textContent=m?'Editar comida':'Añadir comida';$('mealAmount').value=m?.amount||100;$('mealUnit').value=m?.unit||'g';if(m){$('mealName').value=m.name;$('mealType').value=m.type;$('mealKcal').value=m.kcal;$('mealProtein').value=m.protein;$('mealCarbs').value=m.carbs;$('mealFat').value=m.fat;$('nutritionStatus').textContent='Puedes cambiar la cantidad y recalcular con un alimento de la lista.'}else $('nutritionStatus').textContent='Elige un alimento de la lista para calcular automáticamente.';openModal('mealModal')}
   function removeMeal(id){if(!confirm('¿Eliminar esta comida del registro?'))return;const d=dayData();d.meals=d.meals.filter(m=>m.id!==id);save();render();toast('Comida eliminada')}
   $('dayPicker').value=today();$('dayPicker').addEventListener('change',render);$('prevDay').onclick=()=>shiftDate(-1);$('nextDay').onclick=()=>shiftDate(1);
   function shiftDate(n){const d=new Date(selectedDay()+'T12:00:00');d.setDate(d.getDate()+n);$('dayPicker').value=d.toISOString().slice(0,10);render()}
   $('profileBtn').onclick=openProfile;$('editTargets').onclick=openProfile;$('addMeal').onclick=()=>openMeal();$('mobileAddMeal').onclick=()=>openMeal();$('resetWater').onclick=()=>{dayData().water=0;save();render()};
   $$('[data-close]').forEach(b=>b.onclick=closeModals);$$('.overlay').forEach(o=>o.onclick=e=>{if(e.target===o)closeModals()});
   $('profileForm').onsubmit=e=>{e.preventDefault();state.profile={name:$('pName').value.trim(),age:+$('pAge').value,sex:$('pSex').value,height:+$('pHeight').value,weight:+$('pWeight').value,activity:+$('pActivity').value,goal:$('pGoal').value,calories:+$('pCalories').value||null};save();closeModals();render();toast('Perfil guardado')};
-  $('mealForm').onsubmit=e=>{e.preventDefault();const d=dayData();const item={id:editingId||crypto.randomUUID(),name:$('mealName').value.trim(),type:$('mealType').value,kcal:+$('mealKcal').value,protein:+$('mealProtein').value,carbs:+$('mealCarbs').value,fat:+$('mealFat').value};if(editingId){const i=d.meals.findIndex(m=>m.id===editingId);if(i>=0)d.meals[i]=item}else d.meals.push(item);save();closeModals();render();toast(editingId?'Comida actualizada':'Comida añadida')};
+  populateFoodOptions();
+  ['mealName','mealAmount','mealUnit'].forEach(id=>$(id).addEventListener(id==='mealName'?'input':'change',calculateFood));
+  $('mealAmount').addEventListener('input',calculateFood);
+  $('mealForm').onsubmit=e=>{e.preventDefault();const d=dayData();const item={id:editingId||crypto.randomUUID(),name:$('mealName').value.trim(),type:$('mealType').value,amount:+$('mealAmount').value,unit:$('mealUnit').value,kcal:+$('mealKcal').value,protein:+$('mealProtein').value,carbs:+$('mealCarbs').value,fat:+$('mealFat').value};if(editingId){const i=d.meals.findIndex(m=>m.id===editingId);if(i>=0)d.meals[i]=item}else d.meals.push(item);save();closeModals();render();toast(editingId?'Comida actualizada':'Comida añadida')};
   function shiftStart(){if(!state.profile)openProfile()}render();shiftStart();
 })();
 if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
