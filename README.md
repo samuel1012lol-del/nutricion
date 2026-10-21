@@ -8,6 +8,8 @@ Abre `index.html` en un navegador. Completa **Mi perfil** para calcular una meta
 
 El calculador incluye alimentos frecuentes con valores nutricionales promedio por 100 g o 100 ml. Las estimaciones pueden variar según la marca, preparación y receta; los alimentos que no están en el catálogo se pueden registrar introduciendo sus datos manualmente.
 
+También puedes seleccionar una foto de la tabla nutricional al añadir una comida. El reconocimiento de texto se ejecuta en el dispositivo y requiere conexión a internet la primera vez para cargar el lector; comprueba los valores reconocidos antes de guardar. Luego se calculan según los gramos o mililitros indicados.
+
 Los datos se guardan en el almacenamiento local del navegador. No se envían a un servidor.
 
 ## Objetivos
