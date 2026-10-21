@@ -4,7 +4,9 @@ Aplicación web en español para registrar comidas y seguir el balance energéti
 
 ## Uso
 
-Abre `index.html` en un navegador. Completa **Mi perfil** para calcular una meta inicial, y luego usa **Añadir comida** para registrar calorías y macronutrientes. Puedes cambiar de fecha, editar o eliminar registros y anotar vasos de agua.
+Abre `index.html` en un navegador. Completa **Mi perfil** para calcular una meta inicial y usa **Añadir comida** para registrar alimentos. Escribe o selecciona un alimento del catálogo y la cantidad en gramos (g), mililitros (ml) o litros (L): la app estima automáticamente calorías, proteínas, carbohidratos y grasas. También puedes corregir los valores manualmente según la etiqueta nutricional. Puedes cambiar de fecha, editar o eliminar registros y anotar vasos de agua.
+
+El calculador incluye alimentos frecuentes con valores nutricionales promedio por 100 g o 100 ml. Las estimaciones pueden variar según la marca, preparación y receta; los alimentos que no están en el catálogo se pueden registrar introduciendo sus datos manualmente.
 
 Los datos se guardan en el almacenamiento local del navegador. No se envían a un servidor.
 
